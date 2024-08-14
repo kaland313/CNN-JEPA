@@ -1,0 +1,82 @@
+seed: 42
+
+name: "I-JEPA_{data_dataset_name}_{backbone_name}_IN1kCFG_predL{predictor_n_layers}K{predictor_kernel_size}_Mask{mask_strategy}_lr{optimizer_lr}_wd{optimizer_weight_decay}_bs{optimizer_batch_size}_4GPU"
+artifacts_root: "artifacts/pretrain_lightly/ijepacnn"
+
+mask:
+  strategy: "mixed" # multi-block | random | mixed 
+  mutli_block_kwargs:
+    aspect_ratio: [0.75, 1.5]
+    enc_mask_scale: [1.0, 1.0]
+    min_keep: 5 # initially 10
+    num_enc_blocks: 1
+    num_pred_blocks: 4
+    pred_mask_scale: [0.15, 0.2]
+  mixed_mutli_block_ratio: 0.75
+
+mask_ratio: 0.6
+
+backbone:
+  name: "resnet50" 
+  pretrained_weights: null # "imagenet" / null 
+  kwargs: 
+    global_pool: '' # remove the final pooling layer
+predictor:
+  n_layers: 3
+  kernel_size: 3
+  dw_sep_conv: True
+use_projection_head: False
+data:
+  dataset_name: "imagenet-100"
+  num_workers: 12
+
+
+trainer:
+  max_epochs: 201
+  devices: "auto"
+  accelerator: "gpu"
+  precision: "bf16"
+  # sync_batchnorm: True
+  accumulate_grad_batches: null # 4
+  overfit_batches: 0.0 # 1
+  # resume_from_checkpoint: null
+
+optimizer:
+  batch_size: 128
+  lr: 0.01
+  weight_decay: 0.01
+  cosine_warmpup_sched: True
+  lr_warmup_epochs: 10
+  exclude_norm_and_bias_from_wd: False
+  wd_schedule: False
+
+wandb: true # set to false to disable wandb logging
+
+# optimizer:
+#   name: "lars"
+#   classifier_lr: 0.1
+#   weight_decay: 1e-6
+#   kwargs:
+#     clip_lr: True
+#     eta: 0.02
+#     exclude_bias_n_norm: True
+
+# method_kwargs:
+#   proj_hidden_dim: 4096
+#   proj_output_dim: 256
+#   pred_hidden_dim: 8192
+# momentum:
+#   base_tau: 0.99
+#   final_tau: 1.0
+# scheduler:
+#   name: "warmup_cosine"
+# checkpoint:
+#   enabled: True
+#   dir: "artifacts/pretrain"
+#   frequency: 1
+
+# disable hydra outputs
+hydra:
+  output_subdir: null
+  run:
+    dir: .

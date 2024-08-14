@@ -1,0 +1,40 @@
+seed: 42
+
+name: "BYOL_{data_dataset_name}_{backbone_name}_LARS"
+artifacts_root: "artifacts/pretrain_lightly/byol"
+
+backbone:
+  name: "resnet50" # / convnextv2_pico
+  pretrained_weights: null # "imagenet" / null 
+  kwargs: {}
+data:
+  dataset_name: "imagenet-1k"
+  num_workers: 16
+
+
+trainer:
+  max_epochs: 101
+  devices: "auto"
+  accelerator: "gpu"
+  precision: "bf16"
+  sync_batchnorm: True
+  accumulate_grad_batches: null # 4
+  overfit_batches: 0.0 # 1
+
+optimizer:
+  batch_size: 128
+  lr: 0.45
+  weight_decay: 1e-6
+  cosine_warmpup_sched: True
+  lr_warmup_epochs: 10
+  exclude_norm_and_bias_from_wd: True
+  wd_schedule: True
+  algorithm: "lars"
+
+wandb: true # set to false to disable wandb logging
+
+# disable hydra outputs
+hydra:
+  output_subdir: null
+  run:
+    dir: .

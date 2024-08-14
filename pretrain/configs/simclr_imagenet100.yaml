@@ -1,0 +1,40 @@
+seed: 42
+
+name: "SimCLR_{data_dataset_name}_{backbone_name}"
+artifacts_root: "artifacts/pretrain_lightly/simclr"
+
+backbone:
+  name: "resnet50" 
+  pretrained_weights: null # "imagenet" / null 
+  kwargs: {}    
+data:
+  dataset_name: "imagenet-100"
+  num_workers: 16
+
+trainer:
+  max_epochs: 201
+  devices: "auto"
+  accelerator: "gpu"
+  precision: "bf16"
+  sync_batchnorm: True
+  accumulate_grad_batches: null # 4
+  overfit_batches: 0.0 # 1
+  # resume_from_checkpoint: null
+
+optimizer:
+  batch_size: 128
+  lr: 1.7
+  weight_decay: 1e-6
+  cosine_warmpup_sched: True
+  lr_warmup_epochs: 10
+  exclude_norm_and_bias_from_wd: True
+  wd_schedule: False
+  algorithm: "lars"
+
+wandb: true # set to false to disable wandb logging
+
+# disable hydra outputs
+hydra:
+  output_subdir: null
+  run:
+    dir: .
